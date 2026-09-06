@@ -22,9 +22,11 @@ func main() {
 	router.Use(middleware.Recoverer)
 	router.Post("/shorten", h.Shorten)
 	router.Get("/{code}", h.Redirect)
+	router.Post("/register", h.Register)
+	router.Post("/login", h.Login)
 	srv := &http.Server{
-		Addr:    ":8080",
-		Handler: router,
+		Addr:         ":8080",
+		Handler:      router,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  100 * time.Second,
