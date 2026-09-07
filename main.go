@@ -9,10 +9,12 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	chimw "github.com/go-chi/chi/v5/middleware"
 	"github.com/uluanaro/linkshrt/internal/auth"
 	"github.com/uluanaro/linkshrt/internal/handler"
+	"github.com/uluanaro/linkshrt/internal/middleware"
 	"github.com/uluanaro/linkshrt/internal/store"
+	"golang.org/x/time/rate"
 )
 
 func main() {
@@ -20,9 +22,13 @@ func main() {
 	h := handler.New(st)
 
 	router := chi.NewRouter()
-	router.Use(middleware.Logger)
-	router.Use(middleware.Recoverer)
-	router.Group(func(router chi.Router){
+	router.Use(chimw.Logger)
+	router.Use(chimw.Recoverer)
+
+	rl := middleware.NewRateLimiter(rate.Limit(2), 2)
+	router.Use(rl.Middleware)
+
+	router.Group(func(router chi.Router) {
 		router.Use(auth.AuthMiddleware)
 		router.Post("/shorten", h.Shorten)
 	})
