@@ -33,6 +33,7 @@ var validate = validator.New()
 func (h *Handler) Shorten(w http.ResponseWriter, r *http.Request) {
 	var req shortenRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
+	//userID := r.Context().Value(auth.UserIDKey).(int)
 	if err != nil {
 		http.Error(w, "invalid JSON", http.StatusBadRequest)
 		return

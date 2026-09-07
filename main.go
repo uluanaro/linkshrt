@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/uluanaro/linkshrt/internal/auth"
 	"github.com/uluanaro/linkshrt/internal/handler"
 	"github.com/uluanaro/linkshrt/internal/store"
 )
@@ -17,13 +18,18 @@ import (
 func main() {
 	st := store.New()
 	h := handler.New(st)
+
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
-	router.Post("/shorten", h.Shorten)
+	router.Group(func(router chi.Router){
+		router.Use(auth.AuthMiddleware)
+		router.Post("/shorten", h.Shorten)
+	})
 	router.Get("/{code}", h.Redirect)
 	router.Post("/register", h.Register)
 	router.Post("/login", h.Login)
+
 	srv := &http.Server{
 		Addr:         ":8080",
 		Handler:      router,
